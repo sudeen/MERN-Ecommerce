@@ -71,9 +71,50 @@ exports.remove = (req, res) => {
             });
         }
         res.json({
-            deletedProduct, 
             "message": 'Product delete successfully'
         });
     });
 };
 
+exports.update = (req, res) => {
+    let form = new formidable.IncomingForm()
+    form.keepExtensions = true
+    form.parse(req, (err, fields, files) => {
+        if(err){
+            return res.status(400).json({
+                error: 'Image could not not be uploaded'
+            });
+        }
+
+        // check for all fields
+        const {name, description, price, quantity, category, shipping} = fields;
+        if(!name || !description || !price || !quantity || !category || !shipping){
+            return res.status(400).json({
+                error: 'All fields are required'
+            });
+        }
+
+        
+        let product = req.product;
+        product = _.extend(product, fields);
+
+        if(files.photo){  //name depends if you are using photo variable name or image 
+            // console.log('FILES PHOTO: ', files.photo);
+            if(files.photo.size > 1000000){
+                return res.status(400).json({
+                    error: 'Image should be less than 1mb in size'
+                });
+            }
+            product.photo.data = fs.readFileSync(files.photo.path);
+            product.photo.contentType = files.photo.type;
+        } 
+        product.save((err, result) =>{
+            if(err){
+                return res.status(400).json({
+                    error: errorHandler(err)
+                })
+            }
+            res.json(result);
+        }); 
+    });
+};
