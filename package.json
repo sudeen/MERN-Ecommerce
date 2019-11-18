@@ -9,6 +9,7 @@
   "author": "Sudin Ranjitkar",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^6.4.0",
     "body-parser": "^1.19.0",
     "braintree": "^2.21.0",
     "cookie-parser": "^1.4.4",

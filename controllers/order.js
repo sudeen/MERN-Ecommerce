@@ -1,5 +1,8 @@
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const { Order, CartItem } = require("../models/order");
 const { errorHandler } = require("../helpers/dbErrorHandler");
+
 
 exports.orderById = (req, res, next, id) => {
     Order.findById(id)
@@ -15,8 +18,36 @@ exports.orderById = (req, res, next, id) => {
         });
 };
 
+// exports.create = (req, res) => {
+//     console.log("CREATE ORDER: ", req.body);
+//     req.body.order.user = req.profile;
+//     const order = new Order(req.body.order);
+//     order.save((error, data) => {
+//         if (error) {
+//             return res.status(400).json({
+//                 error: errorHandler(error)
+//             });
+//         }
+//         // added for email purpose
+//         const emailData = {
+//             to: 'ranjitkarsudeen14@gmail.com',
+//             from: 'noreply@ecommerce.com',
+//             subject: `A new order is received`,
+//             html: `
+//             <p>Customer name:</p>
+//             <p>Total products: ${order.products.length}</p>
+//             <p>Total cost: ${order.amount}</p>
+//             <p>Login to dashboard to the order in detail.</p>
+//         `
+//         };
+//         console.log('EMAIL TEMPLATE', emailData);
+//         sgMail.send(emailData);
+//         res.json(data);
+//     });
+// };
+
 exports.create = (req, res) => {
-    // console.log("CREATE ORDER: ", req.body);
+    console.log('CREATE ORDER: ', req.body);
     req.body.order.user = req.profile;
     const order = new Order(req.body.order);
     order.save((error, data) => {
@@ -25,6 +56,25 @@ exports.create = (req, res) => {
                 error: errorHandler(error)
             });
         }
+        console.log('USER NAME: ', data.user.name)
+
+        // send email alert to admin
+        // order.address
+        // order.products.length
+        // order.amount
+        const emailData = {
+            to: 'ranjitkarsudeen14@gmail.com',
+            // from: 'noreply@ecommerce.com',
+            from: 'sudran.ranjitkar@gmail.com',
+            subject: `A new order is received`,
+            html: `
+            <p>Customer name: ${data.user.name}</p>
+            <p>Total products: ${order.products.length}</p>
+            <p>Total cost: ${order.amount}</p>
+            <p>Login to dashboard to the order in detail.</p>
+        `
+        };
+        sgMail.send(emailData);
         res.json(data);
     });
 };
